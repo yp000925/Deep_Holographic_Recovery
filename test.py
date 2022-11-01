@@ -237,3 +237,12 @@ for epoch in range(int(checkpoint.step), num_epochs):
         log_array[epoch - last_log] = [epoch, loss_value.numpy(), loss_avg]
 
         checkpoint.step.assign_add(1)
+
+
+export_image(out_hol_amp / np.max(out_hol_amp), path=os.path.join(log_root, 'exports', 'hologram_out.png'), dtype='uint8')
+export_image(hologram_amp / np.max(hologram_amp), path=os.path.join(log_root, 'exports', 'hologram_in.png'), dtype='uint8')
+
+plt.imshow(out_hol_amp.numpy(), "gray")
+plt.show()
+plt.imshow(hologram_amp.numpy(), "gray")
+plt.show()
