@@ -25,6 +25,8 @@ class AngularSpectrumSolver:
 
     def solve(self, initializer, z):
         prop = self.propagator(z)
+        if not initializer.dtype.is_complex:
+            initializer= tf.complex(real=initializer, imag=tf.zeros_like(initializer))
         return tf.signal.ifft2d(prop * tf.signal.fft2d(initializer))
 
 
