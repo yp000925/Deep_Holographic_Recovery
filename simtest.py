@@ -41,7 +41,7 @@ obj_func = tf.convert_to_tensor(amplitude * np.exp(1j * phase), dtype_c)
 hologram = solver.solve(obj_func, z)
 hologram_amp = tf.math.pow(tf.math.abs(hologram), 2)
 
-#
+
 # plt.figure()
 # plt.imshow(amplitude, cmap='gray', vmin=0, vmax=1)
 # plt.show()

@@ -1,5 +1,5 @@
 import os
-#os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
 import random
 import numpy as np
 import pandas as pd
@@ -13,26 +13,39 @@ from skimage.restoration import unwrap_phase
 from fringe.utils.io import import_image, export_image
 from fringe.utils.modifiers import ImageToArray, PreprocessHologram, ConvertToTensor
 from fringe.process.gpu import AngularSpectrumSolver as AsSolver
+import PIL.Image as Image
 dtype_c  = tf.complex64
 dtype_f = tf.float32
-hologram_path = 'Dataset/air_2/hologram.png'
-background_path = 'Dataset/air_2/bg.png'
+hologram_path = 'Dataset/pp03/pp03.bmp'
 
-p1 = ImageToArray(bit_depth=16, channel='gray', crop_window=None, dtype='float32')
-bg = import_image(background_path, modifiers=p1)
-p2 = PreprocessHologram(background=bg)
-p3 = ConvertToTensor()
-hologram = import_image(hologram_path, modifiers=[p1, p2, p3])
+
+Nx = 512
+Ny = 512
+z = 16000
+wavelength = 532e-3
+deltaX = 3.45*2*2
+deltaY = 3.45*2*2
+# p1 = ImageToArray(bit_depth=16, channel='gray', crop_window=[600,244,512,512], dtype='float32')
+# bg = import_image(background_path, modifiers=p1)
+# p2 = PreprocessHologram(background=bg)
+# p3 = ConvertToTensor()
+# hologram = import_image(hologram_path, modifiers=[p1, p2, p3])
+# hologram_amp = tf.math.abs(hologram)
+hologram = Image.open(hologram_path)
+hologram = hologram.crop((0,0,1024,1024))
+hologram = hologram.resize((512,512))
+hologram = np.array(hologram)
+hologram = hologram/255.0
+hologram =  tf.convert_to_tensor(hologram)
 hologram_amp = tf.math.abs(hologram)
-
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.imshow(hologram_amp.numpy(), cmap='gray')
 ax.set_title('hologram')
 
-solver = AsSolver(shape=hologram_amp.shape,dx = 3.45,dy=3.45,wavelength=532e-3)
+solver = AsSolver(shape=hologram_amp.shape,dx = deltaX,dy=deltaY,wavelength=wavelength)
 # z = 238
-z = 17526
+z = 16000
 # rec = solver.solve(hologram,z)
 # amp = np.abs(rec)
 # fig = plt.figure()
@@ -205,7 +218,7 @@ for epoch in range(int(checkpoint.step), num_epochs):
             export_image(out[...,0].numpy(), path=os.path.join(log_root, 'exports', 'out_phase_{:d}.png'.format(int(checkpoint.step))),dtype='uint8')
             export_image(cmap(out[...,0].numpy()), path=os.path.join(log_root, 'exports', 'out_phase_c_{:d}.png'.format(int(checkpoint.step))), dtype='uint8')
             export_image(out[...,1].numpy(), path=os.path.join(log_root, 'exports', 'out_amp_{:d}.png'.format(int(checkpoint.step))), dtype='uint8')
-            export_image(out_hol_amp / np.max(out_hol_amp), path=os.path.join(log_root, 'exports', 'hologram_out_{:d}.png'.format(int(checkpoint.step))), dtype='uint8')
+            export_image(out_hol_amp.numpy() / np.max(out_hol_amp.numpy()), path=os.path.join(log_root, 'exports', 'hologram_out.png'), dtype='uint8')
 
             save_path = manager.save()
             print("Saved checkpoint for step: {}".format(epoch))

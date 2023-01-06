@@ -239,8 +239,8 @@ for epoch in range(int(checkpoint.step), num_epochs):
         checkpoint.step.assign_add(1)
 
 
-export_image(out_hol_amp / np.max(out_hol_amp), path=os.path.join(log_root, 'exports', 'hologram_out.png'), dtype='uint8')
-export_image(hologram_amp / np.max(hologram_amp), path=os.path.join(log_root, 'exports', 'hologram_in.png'), dtype='uint8')
+export_image(out_hol_amp.numpy() / np.max(out_hol_amp.numpy()), path=os.path.join(log_root, 'exports', 'hologram_out.png'), dtype='uint8')
+export_image(hologram_amp.numpy() / np.max(hologram_amp.numpy()), path=os.path.join(log_root, 'exports', 'hologram_in.png'), dtype='uint8')
 
 plt.imshow(out_hol_amp.numpy(), "gray")
 plt.show()
