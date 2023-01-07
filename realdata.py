@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 import random
 import numpy as np
 import pandas as pd
@@ -16,7 +16,8 @@ from fringe.process.gpu import AngularSpectrumSolver as AsSolver
 import PIL.Image as Image
 dtype_c  = tf.complex64
 dtype_f = tf.float32
-hologram_path = 'Dataset/pp03/pp03.bmp'
+# hologram_path = 'Dataset/pp03/pp03.bmp'
+hologram_path = 'Dataset/mixed_Sample/mixed.bmp'
 
 
 Nx = 512
@@ -44,15 +45,14 @@ ax.imshow(hologram_amp.numpy(), cmap='gray')
 ax.set_title('hologram')
 
 solver = AsSolver(shape=hologram_amp.shape,dx = deltaX,dy=deltaY,wavelength=wavelength)
-# z = 238
-z = 16000
-# rec = solver.solve(hologram,z)
-# amp = np.abs(rec)
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.imshow(amp, cmap='gray')
-# ax.set_title("reconstruction amplitude")
-# plt.show()
+bu = tf.cast(hologram, dtype_c)
+rec = solver.solve(bu,z)
+amp = np.abs(rec)
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.imshow(amp, cmap='gray')
+ax.set_title("reconstruction amplitude")
+plt.show()
 
 # model initialization
 
@@ -91,7 +91,7 @@ mse = tf.keras.losses.MeanSquaredError()
 net.summary()
 
 logs_path = 'logs'
-log_folder = "exp_usaf_air"
+log_folder = "mixed_sample"
 log_root = os.path.join(logs_path, log_folder)
 if not os.path.exists(log_root):
     os.mkdir(log_root)
@@ -237,7 +237,7 @@ for epoch in range(int(checkpoint.step), num_epochs):
         checkpoint.step.assign_add(1)
 
 
-export_image(out_hol_amp / np.max(out_hol_amp), path=os.path.join(log_root, 'exports', 'hologram_out.png'), dtype='uint8')
-export_image(hologram_amp / np.max(hologram_amp), path=os.path.join(log_root, 'exports', 'hologram_in.png'), dtype='uint8')
+export_image(out_hol_amp.numpy() / np.max(out_hol_amp.numpy()), path=os.path.join(log_root, 'exports', 'hologram_out.png'), dtype='uint8')
+export_image(hologram_amp.numpy() / np.max(hologram_amp.numpy()), path=os.path.join(log_root, 'exports', 'hologram_in.png'), dtype='uint8')
 
 

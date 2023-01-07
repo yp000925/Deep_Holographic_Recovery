@@ -153,13 +153,16 @@ class MakeComplex(Modifier):
 
 
 class ConvertToTensor(Modifier):
-    def __init__(self):
+    def __init__(self, dtype=False):
         """
         Converts imported arrays to tensorflow tensors.
         """
+        self.dype= dtype
         pass
 
     def process(self, img, *args, **kwargs):
+        if self.dtype:
+            return tf.cast(tf.convert_to_tensor(img),self.dype)
         return tf.convert_to_tensor(img)
 
 
